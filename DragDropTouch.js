@@ -1,3 +1,7 @@
+/**
+ * Patched (only drag-drop dispatch event)
+ * ref: https://github.com/Bernardo-Castilho/dragdroptouch/blob/master/DragDropTouch.js
+ */
 var DragDropTouch;
 (function (DragDropTouch_1) {
     'use strict';
@@ -165,14 +169,6 @@ var DragDropTouch;
         DragDropTouch.prototype._touchstart = function (e) {
             var _this = this;
             if (this._shouldHandle(e)) {
-                // raise double-click and prevent zooming
-                if (Date.now() - this._lastClick < DragDropTouch._DBLCLICK) {
-                    if (this._dispatchEvent(e, 'dblclick', e.target)) {
-                        e.preventDefault();
-                        this._reset();
-                        return;
-                    }
-                }
                 // clear all variables
                 this._reset();
                 // get nearest draggable element
@@ -202,11 +198,6 @@ var DragDropTouch;
             if (this._shouldHandle(e)) {
                 // see if target wants to handle move
                 var target = this._getTarget(e);
-                if (this._dispatchEvent(e, 'mousemove', target)) {
-                    this._lastTouch = e;
-                    e.preventDefault();
-                    return;
-                }
                 // start dragging
                 if (this._dragSource && !this._img) {
                     var delta = this._getDelta(e);
@@ -232,17 +223,6 @@ var DragDropTouch;
         };
         DragDropTouch.prototype._touchend = function (e) {
             if (this._shouldHandle(e)) {
-                // see if target wants to handle up
-                if (this._dispatchEvent(this._lastTouch, 'mouseup', e.target)) {
-                    e.preventDefault();
-                    return;
-                }
-                // user clicked the element but didn't drag, so clear the source and simulate a click
-                if (!this._img) {
-                    this._dragSource = null;
-                    this._dispatchEvent(this._lastTouch, 'click', e.target);
-                    this._lastClick = Date.now();
-                }
                 // finish dragging
                 this._destroyImage();
                 if (this._dragSource) {
