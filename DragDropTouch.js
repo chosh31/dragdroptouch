@@ -152,8 +152,7 @@ var DragDropTouch;
             });
             // listen to touch events
             if ('ontouchstart' in document) {
-                var d = document, ts = this._touchstart.bind(this), tm = this._touchmove.bind(this), te = this._touchend.bind(this), opt = supportsPassive ? { passive: false, capture: false } : false;
-                d.addEventListener('touchstart', ts, opt);
+                var d = document, tm = this._touchmove.bind(this), te = this._touchend.bind(this), opt = supportsPassive ? { passive: false, capture: false } : false;
                 d.addEventListener('touchmove', tm, opt);
                 d.addEventListener('touchend', te);
                 d.addEventListener('touchcancel', te);
@@ -166,34 +165,6 @@ var DragDropTouch;
             return DragDropTouch._instance;
         };
         // ** event handlers
-        DragDropTouch.prototype._touchstart = function (e) {
-            var _this = this;
-            if (this._shouldHandle(e)) {
-                // clear all variables
-                this._reset();
-                // get nearest draggable element
-                var src = this._closestDraggable(e.target);
-                if (src) {
-                    // give caller a chance to handle the hover/move events
-                    if (!this._dispatchEvent(e, 'mousemove', e.target) &&
-                        !this._dispatchEvent(e, 'mousedown', e.target)) {
-                        // get ready to start dragging
-                        this._dragSource = src;
-                        this._ptDown = this._getPoint(e);
-                        this._lastTouch = e;
-                        e.preventDefault();
-                        // show context menu if the user hasn't started dragging after a while
-                        setTimeout(function () {
-                            if (_this._dragSource == src && _this._img == null) {
-                                if (_this._dispatchEvent(e, 'contextmenu', src)) {
-                                    _this._reset();
-                                }
-                            }
-                        }, DragDropTouch._CTXMENU);
-                    }
-                }
-            }
-        };
         DragDropTouch.prototype._touchmove = function (e) {
             if (this._shouldHandle(e)) {
                 // see if target wants to handle move
