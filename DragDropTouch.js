@@ -1,3 +1,7 @@
+/**
+ * Patched (drag-drop dispatch event - mouse event -> touch event)
+ * ref: https://github.com/Bernardo-Castilho/dragdroptouch/blob/master/DragDropTouch.js
+ */
 var DragDropTouch;
 (function (DragDropTouch_1) {
     'use strict';
@@ -132,7 +136,6 @@ var DragDropTouch;
          * Initializes the single instance of the @see:DragDropTouch class.
          */
         function DragDropTouch() {
-            this._lastClick = 0;
             // enforce singleton pattern
             if (DragDropTouch._instance) {
                 throw 'DragDropTouch instance already created.';
@@ -165,22 +168,14 @@ var DragDropTouch;
         DragDropTouch.prototype._touchstart = function (e) {
             var _this = this;
             if (this._shouldHandle(e)) {
-                // raise double-click and prevent zooming
-                if (Date.now() - this._lastClick < DragDropTouch._DBLCLICK) {
-                    if (this._dispatchEvent(e, 'dblclick', e.target)) {
-                        e.preventDefault();
-                        this._reset();
-                        return;
-                    }
-                }
                 // clear all variables
                 this._reset();
                 // get nearest draggable element
                 var src = this._closestDraggable(e.target);
                 if (src) {
                     // give caller a chance to handle the hover/move events
-                    if (!this._dispatchEvent(e, 'mousemove', e.target) &&
-                        !this._dispatchEvent(e, 'mousedown', e.target)) {
+                    if (!this._dispatchEvent(e, 'touchmove', e.target) &&
+                        !this._dispatchEvent(e, 'touchstart', e.target)) {
                         // get ready to start dragging
                         this._dragSource = src;
                         this._ptDown = this._getPoint(e);
@@ -202,7 +197,7 @@ var DragDropTouch;
             if (this._shouldHandle(e)) {
                 // see if target wants to handle move
                 var target = this._getTarget(e);
-                if (this._dispatchEvent(e, 'mousemove', target)) {
+                if (this._dispatchEvent(e, 'touchmove', target)) {
                     this._lastTouch = e;
                     e.preventDefault();
                     return;
@@ -233,15 +228,14 @@ var DragDropTouch;
         DragDropTouch.prototype._touchend = function (e) {
             if (this._shouldHandle(e)) {
                 // see if target wants to handle up
-                if (this._dispatchEvent(this._lastTouch, 'mouseup', e.target)) {
+                if (this._dispatchEvent(this._lastTouch, 'touchend', e.target)) {
                     e.preventDefault();
                     return;
                 }
                 // user clicked the element but didn't drag, so clear the source and simulate a click
                 if (!this._img) {
                     this._dragSource = null;
-                    this._dispatchEvent(this._lastTouch, 'click', e.target);
-                    this._lastClick = Date.now();
+                    this._dispatchEvent(this._lastTouch, 'touchstart', e.target);
                 }
                 // finish dragging
                 this._destroyImage();
@@ -395,7 +389,6 @@ var DragDropTouch;
     // constants
     DragDropTouch._THRESHOLD = 5; // pixels to move before drag starts
     DragDropTouch._OPACITY = 0.5; // drag image opacity
-    DragDropTouch._DBLCLICK = 500; // max ms between clicks in a double click
     DragDropTouch._CTXMENU = 900; // ms to hold before raising 'contextmenu' event
     // copy styles/attributes from drag source to drag image element
     DragDropTouch._rmvAtts = 'id,class,style,draggable'.split(',');
