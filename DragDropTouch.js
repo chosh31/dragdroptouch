@@ -1,20 +1,22 @@
 /**
  * Patched (drag-drop dispatch event - mouse event -> touch event)
+ * Patched (added event targetDom argument)
+ * - var DragDropTouch;
+ * - setDragDropTouch(DragDropTouch || (DragDropTouch = {}), document.querySelector('targetDom'));
  * ref: https://github.com/Bernardo-Castilho/dragdroptouch/blob/master/DragDropTouch.js
  */
-var DragDropTouch;
-(function (DragDropTouch_1) {
+window.setDragDropTouch = function (DragDropTouch_1, targetDom) {
     'use strict';
-    /**
-     * Object used to hold the data that is being dragged during drag and drop operations.
-     *
-     * It may hold one or more data items of different types. For more information about
-     * drag and drop operations and data transfer objects, see
-     * <a href="https://developer.mozilla.org/en-US/docs/Web/API/DataTransfer">HTML Drag and Drop API</a>.
-     *
-     * This object is created automatically by the @see:DragDropTouch singleton and is
-     * accessible through the @see:dataTransfer property of all drag events.
-     */
+	/**
+	 * Object used to hold the data that is being dragged during drag and drop operations.
+	 *
+	 * It may hold one or more data items of different types. For more information about
+	 * drag and drop operations and data transfer objects, see
+	 * <a href="https://developer.mozilla.org/en-US/docs/Web/API/DataTransfer">HTML Drag and Drop API</a>.
+	 *
+	 * This object is created automatically by the @see:DragDropTouch singleton and is
+	 * accessible through the @see:dataTransfer property of all drag events.
+	 */
     var DataTransfer = (function () {
         function DataTransfer() {
             this._dropEffect = 'move';
@@ -22,10 +24,10 @@ var DragDropTouch;
             this._data = {};
         }
         Object.defineProperty(DataTransfer.prototype, "dropEffect", {
-            /**
-             * Gets or sets the type of drag-and-drop operation currently selected.
-             * The value must be 'none',  'copy',  'link', or 'move'.
-             */
+			/**
+			 * Gets or sets the type of drag-and-drop operation currently selected.
+			 * The value must be 'none',  'copy',  'link', or 'move'.
+			 */
             get: function () {
                 return this._dropEffect;
             },
@@ -36,11 +38,11 @@ var DragDropTouch;
             configurable: true
         });
         Object.defineProperty(DataTransfer.prototype, "effectAllowed", {
-            /**
-             * Gets or sets the types of operations that are possible.
-             * Must be one of 'none', 'copy', 'copyLink', 'copyMove', 'link',
-             * 'linkMove', 'move', 'all' or 'uninitialized'.
-             */
+			/**
+			 * Gets or sets the types of operations that are possible.
+			 * Must be one of 'none', 'copy', 'copyLink', 'copyMove', 'link',
+			 * 'linkMove', 'move', 'all' or 'uninitialized'.
+			 */
             get: function () {
                 return this._effectAllowed;
             },
@@ -51,24 +53,24 @@ var DragDropTouch;
             configurable: true
         });
         Object.defineProperty(DataTransfer.prototype, "types", {
-            /**
-             * Gets an array of strings giving the formats that were set in the @see:dragstart event.
-             */
+			/**
+			 * Gets an array of strings giving the formats that were set in the @see:dragstart event.
+			 */
             get: function () {
                 return Object.keys(this._data);
             },
             enumerable: true,
             configurable: true
         });
-        /**
-         * Removes the data associated with a given type.
-         *
-         * The type argument is optional. If the type is empty or not specified, the data
-         * associated with all types is removed. If data for the specified type does not exist,
-         * or the data transfer contains no data, this method will have no effect.
-         *
-         * @param type Type of data to remove.
-         */
+		/**
+		 * Removes the data associated with a given type.
+		 *
+		 * The type argument is optional. If the type is empty or not specified, the data
+		 * associated with all types is removed. If data for the specified type does not exist,
+		 * or the data transfer contains no data, this method will have no effect.
+		 *
+		 * @param type Type of data to remove.
+		 */
         DataTransfer.prototype.clearData = function (type) {
             if (type != null) {
                 delete this._data[type];
@@ -77,34 +79,34 @@ var DragDropTouch;
                 this._data = null;
             }
         };
-        /**
-         * Retrieves the data for a given type, or an empty string if data for that type does
-         * not exist or the data transfer contains no data.
-         *
-         * @param type Type of data to retrieve.
-         */
+		/**
+		 * Retrieves the data for a given type, or an empty string if data for that type does
+		 * not exist or the data transfer contains no data.
+		 *
+		 * @param type Type of data to retrieve.
+		 */
         DataTransfer.prototype.getData = function (type) {
             return this._data[type] || '';
         };
-        /**
-         * Set the data for a given type.
-         *
-         * For a list of recommended drag types, please see
-         * https://developer.mozilla.org/en-US/docs/Web/Guide/HTML/Recommended_Drag_Types.
-         *
-         * @param type Type of data to add.
-         * @param value Data to add.
-         */
+		/**
+		 * Set the data for a given type.
+		 *
+		 * For a list of recommended drag types, please see
+		 * https://developer.mozilla.org/en-US/docs/Web/Guide/HTML/Recommended_Drag_Types.
+		 *
+		 * @param type Type of data to add.
+		 * @param value Data to add.
+		 */
         DataTransfer.prototype.setData = function (type, value) {
             this._data[type] = value;
         };
-        /**
-         * Set the image to be used for dragging if a custom one is desired.
-         *
-         * @param img An image element to use as the drag feedback image.
-         * @param offsetX The horizontal offset within the image.
-         * @param offsetY The vertical offset within the image.
-         */
+		/**
+		 * Set the image to be used for dragging if a custom one is desired.
+		 *
+		 * @param img An image element to use as the drag feedback image.
+		 * @param offsetX The horizontal offset within the image.
+		 * @param offsetY The vertical offset within the image.
+		 */
         DataTransfer.prototype.setDragImage = function (img, offsetX, offsetY) {
             var ddt = DragDropTouch._instance;
             ddt._imgCustom = img;
@@ -113,28 +115,28 @@ var DragDropTouch;
         return DataTransfer;
     }());
     DragDropTouch_1.DataTransfer = DataTransfer;
-    /**
-     * Defines a class that adds support for touch-based HTML5 drag/drop operations.
-     *
-     * The @see:DragDropTouch class listens to touch events and raises the
-     * appropriate HTML5 drag/drop events as if the events had been caused
-     * by mouse actions.
-     *
-     * The purpose of this class is to enable using existing, standard HTML5
-     * drag/drop code on mobile devices running IOS or Android.
-     *
-     * To use, include the DragDropTouch.js file on the page. The class will
-     * automatically start monitoring touch events and will raise the HTML5
-     * drag drop events (dragstart, dragenter, dragleave, drop, dragend) which
-     * should be handled by the application.
-     *
-     * For details and examples on HTML drag and drop, see
-     * https://developer.mozilla.org/en-US/docs/Web/Guide/HTML/Drag_operations.
-     */
+	/**
+	 * Defines a class that adds support for touch-based HTML5 drag/drop operations.
+	 *
+	 * The @see:DragDropTouch class listens to touch events and raises the
+	 * appropriate HTML5 drag/drop events as if the events had been caused
+	 * by mouse actions.
+	 *
+	 * The purpose of this class is to enable using existing, standard HTML5
+	 * drag/drop code on mobile devices running IOS or Android.
+	 *
+	 * To use, include the DragDropTouch.js file on the page. The class will
+	 * automatically start monitoring touch events and will raise the HTML5
+	 * drag drop events (dragstart, dragenter, dragleave, drop, dragend) which
+	 * should be handled by the application.
+	 *
+	 * For details and examples on HTML drag and drop, see
+	 * https://developer.mozilla.org/en-US/docs/Web/Guide/HTML/Drag_operations.
+	 */
     var DragDropTouch = (function () {
-        /**
-         * Initializes the single instance of the @see:DragDropTouch class.
-         */
+		/**
+		 * Initializes the single instance of the @see:DragDropTouch class.
+		 */
         function DragDropTouch() {
             // enforce singleton pattern
             if (DragDropTouch._instance) {
@@ -151,16 +153,16 @@ var DragDropTouch;
             });
             // listen to touch events
             if ('ontouchstart' in document) {
-                var d = document, ts = this._touchstart.bind(this), tm = this._touchmove.bind(this), te = this._touchend.bind(this), opt = supportsPassive ? { passive: false, capture: false } : false;
+                var d = targetDom || document, ts = this._touchstart.bind(this), tm = this._touchmove.bind(this), te = this._touchend.bind(this), opt = supportsPassive ? { passive: false, capture: false } : false;
                 d.addEventListener('touchstart', ts, opt);
                 d.addEventListener('touchmove', tm, opt);
                 d.addEventListener('touchend', te);
                 d.addEventListener('touchcancel', te);
             }
         }
-        /**
-         * Gets a reference to the @see:DragDropTouch singleton.
-         */
+		/**
+		 * Gets a reference to the @see:DragDropTouch singleton.
+		 */
         DragDropTouch.getInstance = function () {
             return DragDropTouch._instance;
         };
@@ -397,4 +399,4 @@ var DragDropTouch;
     DragDropTouch._kbdProps = 'altKey,ctrlKey,metaKey,shiftKey'.split(',');
     DragDropTouch._ptProps = 'pageX,pageY,clientX,clientY,screenX,screenY'.split(',');
     DragDropTouch_1.DragDropTouch = DragDropTouch;
-})(DragDropTouch || (DragDropTouch = {}));
+};
