@@ -371,7 +371,13 @@ window.setDragDropTouch = function (DragDropTouch_1, targetDom) {
                 this._copyProps(evt, e, DragDropTouch._kbdProps);
                 this._copyProps(evt, t, DragDropTouch._ptProps);
                 evt.dataTransfer = this._dataTransfer;
-                target.dispatchEvent(evt);
+
+                if (type == 'touchmove') {
+                    if (evt.originalEvent && evt.originalEvent.changedTouches)
+                        target.dispatchEvent(evt);
+                } else {
+                    target.dispatchEvent(evt);
+                }
                 return evt.defaultPrevented;
             }
             return false;
